@@ -1,0 +1,24 @@
+{
+  "name": "ecbs-hotelsuite",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-09-01",
+  "containers": [
+    {
+      "class_name": "EcbsApp",
+      "image": "../Dockerfile",
+      "image_build_context": "..",
+      "instance_type": "basic",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": { "bindings": [{ "name": "ECBS", "class_name": "EcbsApp" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["EcbsApp"] }],
+  "triggers": { "crons": ["35 2 * * *"] },   // 02:35 UTC = 05:35 Nairobi: wakes the server so nightly room billing posts
+  "vars": { "TZ": "Africa/Nairobi" }
+  // After the first deploy, add your addresses (the domain must be on your Cloudflare account), e.g.:
+  // "routes": [
+  //   { "pattern": "platform.yourdomain.com", "custom_domain": true },        // developer panel  (secret PLATFORM_HOST=platform.yourdomain.com)
+  //   { "pattern": "*.yourdomain.com/*", "zone_name": "yourdomain.com" }      // every client = code.yourdomain.com (secret PLATFORM_DOMAIN=yourdomain.com)
+  // ]
+  // Use a DEDICATED domain for this: the wildcard route sends every subdomain of it to this app.
+}

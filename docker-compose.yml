@@ -1,0 +1,77 @@
+# ECBS HotelSuite - production stack: app + PostgreSQL + automatic HTTPS + daily encrypted-optional backups.
+# Works on any VM or cloud that runs Docker. Copy .env.example to .env and fill it in first.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ecbs
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: ecbs
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecbs -d ecbs"]
+      interval: 5s
+      retries: 20
+    # not published to the internet: only the app can reach it
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://ecbs:${DB_PASSWORD}@db:5432/ecbs
+      TRUST_PROXY: "true"
+      COOKIE_SECURE: "true"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      DEV_USER: ${DEV_USER:-}
+      DEV_PASSWORD: ${DEV_PASSWORD:-}
+      DATA_KEY: ${DATA_KEY:?set DATA_KEY in .env}
+      SESSION_IDLE_MIN: ${SESSION_IDLE_MIN:-30}
+      TZ: ${TZ:-Africa/Nairobi}
+    expose: ["3000"]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:-}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache openssl >/dev/null 2>&1
+        while true; do
+          f=/backups/ecbs-$$(date +%Y%m%d-%H%M%S).sql.gz
+          if pg_dump -h db -U ecbs ecbs | gzip > $$f; then
+            if [ -n "$$BACKUP_PASSPHRASE" ]; then openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:BACKUP_PASSPHRASE -in $$f -out $$f.enc && rm $$f; fi
+            echo "backup ok $$f"
+          else echo "BACKUP FAILED"; rm -f $$f; fi
+          find /backups -name 'ecbs-*' -mtime +$$KEEP_DAYS -delete
+          sleep 86400
+        done
+
+volumes:
+  dbdata:
+  caddydata:
+  caddyconfig:

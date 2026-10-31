@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ettylinks · Developer Panel</title>
+<link rel="icon" href="/platform/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/platform/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/platform/favicon-192.png">
+<link rel="apple-touch-icon" href="/platform/favicon-180.png">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{--bg:#0b0b0c;--p:#141416;--p2:#1b1b1e;--bd:#2a2a2e;--tx:#e9e9ec;--mu:#9a9aa3;--gd:#f2b705;--gd2:#c99700;--ok:#2fbf71;--er:#e5484d;--wr:#f5a623;--sv:#cfd3da}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--gd)}h1,h2,h3{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;background:#0f0f11;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gd)}
+label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
+.b{background:linear-gradient(180deg,var(--gd),var(--gd2));color:#111;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+.b:hover{filter:brightness(1.08)}.b.g{background:transparent;color:var(--tx);border:1px solid var(--bd)}.b.g:hover{border-color:var(--gd);color:var(--gd)}
+.b.d{background:var(--er);color:#fff}.b.s{padding:4px 10px;font-size:12px}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lbox{width:100%;max-width:380px;background:var(--p);border:1px solid var(--bd);border-radius:16px;padding:26px;text-align:center}
+.lbox img{width:190px;max-width:70%;border-radius:12px;margin-bottom:8px}.lbox label{text-align:left}
+.err{color:var(--er);font-size:13px;min-height:18px;margin-top:8px}
+#app{display:none;min-height:100vh}
+#side{position:fixed;inset:0 auto 0 0;width:220px;background:var(--p);border-right:1px solid var(--bd);padding:14px 10px;display:flex;flex-direction:column}
+#side .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 14px}#side .brand img{width:42px;height:42px;border-radius:10px}
+#side .brand b{display:block;color:var(--gd);line-height:1.1}#side .brand small{color:var(--mu)}
+.nav a{display:block;padding:9px 12px;border-radius:8px;color:var(--tx);text-decoration:none;cursor:pointer;margin-bottom:2px}
+.nav a:hover{background:var(--p2)}.nav a.on{background:rgba(242,183,5,.12);color:var(--gd)}
+#side .me{margin-top:auto;border-top:1px solid var(--bd);padding-top:10px;font-size:12px;color:var(--mu)}
+#main{margin-left:220px;padding:22px 26px;max-width:1300px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.top h2{font-size:22px}.top h2 small{color:var(--mu);font-weight:400;font-size:13px;margin-left:8px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:26px;color:var(--gd)}.stat span{color:var(--mu);font-size:12px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);font-weight:600}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--p2)}
+.tw{overflow:auto;background:var(--p);border:1px solid var(--bd);border-radius:12px}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid var(--bd)}
+.badge.active{color:var(--ok);border-color:var(--ok)}.badge.trial{color:var(--gd);border-color:var(--gd)}.badge.suspended,.badge.cancelled{color:var(--er);border-color:var(--er)}.badge.unmanaged{color:var(--mu)}
+.chip{display:inline-block;background:var(--p2);border:1px solid var(--bd);border-radius:6px;padding:1px 7px;margin:2px 3px 2px 0;font-size:11px;color:var(--sv)}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:150px}
+.tabs{display:flex;gap:4px;margin:6px 0 14px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.tabs a{padding:8px 14px;cursor:pointer;color:var(--mu);border-bottom:2px solid transparent}.tabs a.on{color:var(--gd);border-color:var(--gd)}
+.mods{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.mod{display:flex;gap:10px;align-items:flex-start;background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:10px;cursor:pointer}
+.mod input{width:auto;margin-top:3px}.mod.on{border-color:var(--gd)}.mod small{display:block;color:var(--mu)}.mod em{font-style:normal;font-size:10px;color:var(--gd)}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px;z-index:50}
+#ov.show{display:flex}.modal{background:var(--p);border:1px solid var(--bd);border-radius:14px;padding:20px;width:100%;max-width:640px}
+.modal h3{margin-bottom:6px;color:var(--gd)}.ac{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.cred{background:#0f0f11;border:1px dashed var(--gd);border-radius:10px;padding:12px;margin-top:10px;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--p2);border:1px solid var(--gd);padding:10px 16px;border-radius:10px;display:none;z-index:99;max-width:90vw}
+.mu{color:var(--mu)}.warn{color:var(--wr)}.right{text-align:right}
+#mnav{display:none}
+@media(max-width:820px){#side{position:static;width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--bd)}#side .brand{padding:0 8px 0 0}#side .me{margin:0 0 0 auto;border:0;padding:0}.nav{display:flex;flex-wrap:wrap}#main{margin-left:0;padding:14px}}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="lbox">
+    <img src="/platform/logo.jpg" alt="Ettylinks Quick Design Hub">
+    <h3 style="color:var(--gd);margin-bottom:2px">Developer Panel</h3>
+    <div class="mu" style="margin-bottom:8px">Licensing · Organisations · Packages</div>
+    <label>Username<input id="lu" autocomplete="username" autofocus></label>
+    <label>Password<input id="lp" type="password" autocomplete="current-password"></label>
+    <div class="err" id="le"></div>
+    <button class="b" style="width:100%;margin-top:6px" id="lb">Sign in</button>
+  </div>
+</div>
+
+<div id="app">
+  <aside id="side">
+    <div class="brand"><img src="/platform/favicon-64.png" alt=""><div><b>Ettylinks</b><small>Developer Panel</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="me"><div id="who"></div><a href="#" id="chpw" style="color:var(--sv)">Change password</a> · <a href="#" id="out" style="color:var(--sv)">Sign out</a></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="ov"><div class="modal" id="md"></div></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const S={csrf:'',me:null,mods:[],cycles:[],pkgs:[],clients:[],view:'dash',cid:null,tab:'pkg',domain:'',pdom:''};
+const money=(n,c)=>(c||'KES')+' '+Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0});
+const dt=ts=>ts?new Date(ts).toLocaleString([], {dateStyle:'medium',timeStyle:'short'}):'—';
+const dd=s=>s||'—';
+const PER={monthly:'month',quarterly:'quarter',biannual:'6 months',yearly:'year'},per=c=>PER[c]||c;
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3500)}
+async function api(method,url,body){
+  const r=await fetch(url,{method,credentials:'same-origin',headers:{'Content-Type':'application/json',...(S.csrf&&method!=='GET'?{'X-CSRF-Token':S.csrf}:{})},body:body==null?undefined:JSON.stringify(body)});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401&&S.me){S.me=null;showLogin('Your session ended. Sign in again.')}
+  if(!r.ok){const e=new Error((j&&j.error)||('Error '+r.status));e.code=j&&j.code;e.status=r.status;throw e}
+  return j;
+}
+const go=async fn=>{try{return await fn()}catch(e){if(e.code==='password_change_required')return forceChange();toast(e.message)}};
+function modal(h){$('#md').innerHTML=h;$('#ov').classList.add('show')}
+function closeM(){$('#ov').classList.remove('show')}
+$('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')closeM()});
+function copy(t){navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Copied'))}
+
+/* ---------- login ---------- */
+function showLogin(msg){$('#app').style.display='none';$('#login').style.display='flex';$('#le').textContent=msg||'';$('#lp').value=''}
+async function doLogin(){
+  $('#le').textContent='';
+  try{const r=await api('POST','/api/platform/login',{username:$('#lu').value,password:$('#lp').value});S.csrf=r.csrf;S.me=r.user;await boot()}
+  catch(e){$('#le').textContent=e.message}
+}
+$('#lb').onclick=doLogin;$('#lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});$('#lu').addEventListener('keydown',e=>{if(e.key==='Enter')$('#lp').focus()});
+$('#out').onclick=async e=>{e.preventDefault();try{await api('POST','/api/platform/logout')}catch(x){}S.me=null;S.csrf='';showLogin()};
+$('#chpw').onclick=e=>{e.preventDefault();chpwForm(false)};
+function chpwForm(force){
+  modal(`<h3>${force?'Set a new password':'Change password'}</h3>${force?'<p class="mu">You must choose your own password before continuing (at least 12 characters, mixed letters and numbers).</p>':''}
+  <label>Current password<input id="cp0" type="password"></label><label>New password<input id="cp1" type="password"></label>
+  <div class="ac"><button class="b" onclick="chpwSave(${force})">Save</button>${force?'':'<button class="b g" onclick="closeM()">Cancel</button>'}</div>`);
+}
+async function chpwSave(force){try{await api('POST','/api/platform/change-password',{old:$('#cp0').value,new:$('#cp1').value});closeM();toast('Password changed');if(force){S.me.must_change=false;await boot()}}catch(e){toast(e.message)}}
+function forceChange(){$('#login').style.display='none';$('#app').style.display='block';chpwForm(true)}
+
+/* ---------- boot / nav ---------- */
+const NAV=[['dash','Dashboard'],['clients','Organisations'],['pkgs','Packages'],['pays','Payments'],['team','Platform team',1],['audit','Activity log']];
+async function boot(){
+  const m=await api('GET','/api/platform/me').catch(()=>null);if(!m){return showLogin()}
+  S.me=m.user;S.csrf=m.csrf;S.pdom=m.platform_domain||'';
+  if(S.me.must_change)return forceChange();
+  const md=await api('GET','/api/platform/modules');S.mods=md.modules;S.cycles=md.cycles;
+  $('#login').style.display='none';$('#app').style.display='block';
+  $('#who').innerHTML=`<b style="color:var(--tx)">${esc(S.me.display)}</b><br>${esc(S.me.role)}`;
+  $('#nav').innerHTML=NAV.filter(n=>!n[2]||S.me.owner).map(n=>`<a data-v="${n[0]}" onclick="nav('${n[0]}')">${n[1]}</a>`).join('');
+  nav(S.view==='client'?'clients':S.view);
+}
+async function nav(v,id){
+  S.view=v;if(id)S.cid=id;
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===(v==='client'?'clients':v)));
+  $('#main').innerHTML='<p class="mu">Loading…</p>';
+  await go(async()=>{await ({dash:vDash,clients:vClients,client:vClient,pkgs:vPkgs,pays:vPays,team:vTeam,audit:vAudit}[v])()});
+}
+
+/* ---------- dashboard ---------- */
+async function vDash(){
+  const o=await api('GET','/api/platform/overview');
+  const st=o.by_status||{};
+  const rev=(o.revenue_30d||[]).map(r=>money(r.total,r.currency)).join(' + ')||'—';
+  const rows=a=>a.length?a.map(c=>`<tr class="click" onclick="nav('client','${esc(c.id)}')"><td>${esc(c.name)}</td><td>${esc(c.package)}</td><td><span class="badge ${esc(c.status)}">${esc(c.status)}</span></td><td>${esc(c.paid_until)}</td></tr>`).join(''):'<tr><td colspan="4" class="mu">None</td></tr>';
+  $('#main').innerHTML=`<div class="top"><h2>Dashboard</h2></div>
+  <div class="grid">
+   <div class="card stat"><b>${o.clients}</b><span>Organisations</span></div>
+   <div class="card stat"><b>${st.active||0}</b><span>Active (paying)</span></div>
+   <div class="card stat"><b>${st.trial||0}</b><span>On trial</span></div>
+   <div class="card stat"><b>${(st.suspended||0)+(st.cancelled||0)}</b><span>Suspended / cancelled</span></div>
+   <div class="card stat"><b>${money(o.mrr)}</b><span>Monthly recurring revenue</span></div>
+   <div class="card stat"><b style="font-size:18px">${esc(rev)}</b><span>Payments, last 30 days</span></div>
+  </div>
+  <h3 style="margin:22px 0 8px">Overdue <span class="mu" style="font-weight:400">(licence ran out – the client's system is read-only after the grace period)</span></h3>
+  <div class="tw"><table><tr><th>Organisation</th><th>Package</th><th>Status</th><th>Expired on</th></tr>${rows(o.overdue)}</table></div>
+  <h3 style="margin:22px 0 8px">Renewals due in the next 14 days</h3>
+  <div class="tw"><table><tr><th>Organisation</th><th>Package</th><th>Status</th><th>Due</th></tr>${rows(o.expiring)}</table></div>`;
+}
+
+/* ---------- organisations ---------- */
+let CF={q:'',st:'all'};
+async function vClients(){
+  S.clients=(await api('GET','/api/platform/clients')).clients;
+  $('#main').innerHTML=`<div class="top"><h2>Organisations <small>${S.clients.length}</small></h2>
+   <div class="row" style="max-width:520px;flex:1;justify-content:flex-end"><input id="cq" placeholder="Search name, code or address" value="${esc(CF.q)}" style="max-width:260px">
+   <select id="cs" style="max-width:150px">${['all','active','trial','suspended','cancelled','unmanaged'].map(x=>`<option ${CF.st===x?'selected':''}>${x}</option>`).join('')}</select>
+   ${S.me.owner?'<button class="b" style="flex:0 0 auto" onclick="newClient()">+ New organisation</button>':''}</div></div>
+   <div class="tw"><table id="ct"></table></div>`;
+  $('#cq').oninput=e=>{CF.q=e.target.value;drawClients()};$('#cs').onchange=e=>{CF.st=e.target.value;drawClients()};drawClients();
+}
+function drawClients(){
+  const q=CF.q.toLowerCase(),L=S.clients.filter(c=>(CF.st==='all'||c.status===CF.st)&&(!q||(c.name+' '+c.id+' '+c.hosts.join(' ')).toLowerCase().includes(q)));
+  $('#ct').innerHTML=`<tr><th>Organisation</th><th>Package</th><th>Status</th><th>Paid until</th><th>Users</th><th>Last activity</th><th>Address</th></tr>`+(L.map(c=>`<tr class="click" onclick="nav('client','${esc(c.id)}')">
+   <td><b>${esc(c.name)}</b><br><span class="mu">${esc(c.id)}</span></td><td>${esc(c.package)}<br><span class="mu">${c.managed?money(c.price,c.currency)+' / '+esc(per(c.cycle)):''}</span></td>
+   <td><span class="badge ${esc(c.status)}">${esc(c.status)}</span></td><td>${esc(dd(c.paid_until))}</td><td>${c.users}${c.max_users?' / '+c.max_users:''}</td><td>${esc(dt(c.activity))}</td>
+   <td>${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(c.url.replace('https://',''))}</a>`:'<span class="mu">no address yet</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="mu">No organisations match.</td></tr>');
+}
+async function newClient(){
+  const pk=(await api('GET','/api/platform/packages')).packages.filter(p=>p.active);S.pkgs=pk;
+  if(!pk.length)return toast('Create an active package first');
+  modal(`<h3>Deploy a new organisation</h3><p class="mu">Creates the organisation, its own private data space, its administrator login and its licence.</p>
+  <div class="row"><label>Organisation name<input id="nn" placeholder="e.g. Savannah Lodge"></label><label>Short code (web address)<input id="ns" placeholder="savannah-lodge"></label></div>
+  <div class="row"><label>Package<select id="np">${pk.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · ${money(p.price,p.currency)} / ${esc(per(p.cycle))}</option>`).join('')}</select></label>
+   <label>Trial days<input id="nt" type="number" min="0" placeholder="package default"></label></div>
+  <div class="row"><label>Admin username<input id="na" value="admin"></label><label>Admin password (leave blank to generate)<input id="nw" type="text" autocomplete="off"></label></div>
+  <div class="row"><label>Contact person<input id="nc"></label><label>Phone<input id="nph"></label><label>Email<input id="nem"></label></div>
+  <label>Web address(es), one per line ${S.pdom?`<span class="mu">— leave blank to use <b>code.${esc(S.pdom)}</b></span>`:''}<textarea id="nh" rows="2" placeholder="hotel.client.co.ke"></textarea></label>
+  <div class="ac"><button class="b" onclick="saveNew()">Deploy</button><button class="b g" onclick="closeM()">Cancel</button></div>`);
+  $('#nn').oninput=e=>{if(!$('#ns').dataset.m)$('#ns').value=e.target.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32)};$('#ns').oninput=e=>e.target.dataset.m=1;
+}
+async function saveNew(){
+  const b={name:$('#nn').value,slug:$('#ns').value,package_id:$('#np').value,admin_user:$('#na').value,admin_password:$('#nw').value||undefined,contact:$('#nc').value,phone:$('#nph').value,email:$('#nem').value,hosts:$('#nh').value.split(/\n|,/).map(x=>x.trim()).filter(Boolean)};
+  if($('#nt').value!=='')b.trial_days=+$('#nt').value;
+  await go(async()=>{const r=await api('POST','/api/platform/clients',b);
+    const link=r.url||'(add a web address for this organisation)';
+    modal(`<h3>Organisation deployed ✔</h3><p>Give these sign-in details to the client. The password is shown <b>only once</b> and must be changed at first login.</p>
+     <div class="cred" id="cr">Address: ${esc(link)}\nUsername: ${esc(r.admin_user)}\nPassword: ${esc(r.temp_password||'(the one you entered)')}\nLicence valid until: ${esc(r.paid_until)}</div>
+     <div class="ac"><button class="b" onclick="copy($('#cr').innerText)">Copy details</button><button class="b g" onclick="closeM();nav('client','${esc(r.id)}')">Open organisation</button></div>`);
+    $('#cr').style.whiteSpace='pre-wrap'});
+}
+
+/* ---------- organisation detail ---------- */
+async function vClient(){
+  const [c,pk]=await Promise.all([api('GET','/api/platform/clients/'+encodeURIComponent(S.cid)),api('GET','/api/platform/packages')]);
+  S.pkgs=pk.packages;S.c=c;drawClient();
+}
+function drawClient(){
+  const c=S.c,own=S.me.owner,tabs=[['pkg','Package & modules'],['bill','Billing'],['det','Details & address'],['usr','Users'],['act','Activity']];
+  $('#main').innerHTML=`<div class="top"><div><a href="#" onclick="nav('clients');return false" class="mu">← Organisations</a><h2>${esc(c.name)} <span class="badge ${esc(c.status)}">${esc(c.status)}</span><small>${esc(c.id)}</small></h2></div>
+   <div class="row" style="flex:0 0 auto">${c.url?`<a class="b g" href="${esc(c.url)}" target="_blank" rel="noopener">Open site ↗</a>`:''}
+   ${own&&c.managed?(c.status==='suspended'?`<button class="b" onclick="setStatus('active')">Reactivate</button>`:`<button class="b d" onclick="setStatus('suspended')">Suspend</button>`):''}</div></div>
+   ${c.managed?'':`<div class="card warn" style="margin-bottom:12px">This site existed before the developer panel, so it is not managed yet and currently has <b>all modules</b>, no user limit and no billing. Choose a package below and save to bring it under control.</div>`}
+   <div class="tabs">${tabs.map(t=>`<a class="${S.tab===t[0]?'on':''}" onclick="S.tab='${t[0]}';drawClient()">${t[1]}</a>`).join('')}</div><div id="tb"></div>`;
+  ({pkg:tPkg,bill:tBill,det:tDet,usr:tUsr,act:tAct}[S.tab])();
+}
+const pkgById=id=>S.pkgs.find(p=>p.id===id);
+function tPkg(){
+  const c=S.c,own=S.me.owner,pk=pkgById(c.package_id),base=new Set(pk?pk.modules:[]),cur=new Set(c.modules);
+  $('#tb').innerHTML=`<div class="card"><div class="row"><label>Package<select id="kp" ${own?'':'disabled'}>${c.managed?'':'<option value="">— choose —</option>'}${S.pkgs.map(p=>`<option value="${esc(p.id)}" ${p.id===c.package_id?'selected':''}>${esc(p.name)} · ${money(p.price,p.currency)} / ${esc(per(p.cycle))}${p.active?'':' (not for sale)'}</option>`).join('')}</select></label>
+   <label>Max users <span class="mu">(blank = package: ${pk?(pk.max_users||'unlimited'):'—'})</span><input id="ku" type="number" min="0" value="${c.max_users_override==null?'':c.max_users_override}" ${own?'':'disabled'}></label>
+   <label>Custom price <span class="mu">(blank = package: ${pk?money(pk.price,pk.currency):'—'})</span><input id="kpr" type="number" min="0" value="${c.price_override==null?'':c.price_override}" ${own?'':'disabled'}></label></div></div>
+   <h3 style="margin:18px 0 6px">Modules this client can use</h3><p class="mu" style="margin:0 0 8px">Ticked = switched on. Changing a tick away from the package makes a custom exception for this client only. Switched-off modules disappear from the client's menus and the server refuses their data changes; their data is kept if you switch them back on.</p>
+   <div class="mods" id="km">${S.mods.map(m=>`<label class="mod ${cur.has(m.id)?'on':''}"><input type="checkbox" value="${m.id}" ${cur.has(m.id)?'checked':''} ${own?'':'disabled'}><span><b>${esc(m.name)}</b> ${pk&&base.has(m.id)!==cur.has(m.id)?'<em>custom</em>':''}<small>${esc(m.desc)}</small></span></label>`).join('')}</div>
+   ${own?`<div class="ac"><button class="b g" onclick="resetMods()">Match package exactly</button><button class="b" onclick="savePkg()">Save package & modules</button></div>`:''}`;
+  $('#km').onchange=e=>e.target.closest('.mod').classList.toggle('on',e.target.checked);
+  $('#kp').onchange=()=>{const p=pkgById($('#kp').value);if(p)document.querySelectorAll('#km input').forEach(i=>{i.checked=p.modules.includes(i.value);i.closest('.mod').classList.toggle('on',i.checked)})};
+}
+function resetMods(){const p=pkgById($('#kp').value);if(!p)return;document.querySelectorAll('#km input').forEach(i=>{i.checked=p.modules.includes(i.value);i.closest('.mod').classList.toggle('on',i.checked)});$('#ku').value='';$('#kpr').value=''}
+async function savePkg(){
+  const p=pkgById($('#kp').value);if(!p)return toast('Choose a package');
+  const want=[...document.querySelectorAll('#km input:checked')].map(i=>i.value);
+  const b={package_id:p.id,add_modules:want.filter(m=>!p.modules.includes(m)),remove_modules:p.modules.filter(m=>!want.includes(m)),max_users:$('#ku').value===''?null:+$('#ku').value,price:$('#kpr').value===''?null:+$('#kpr').value};
+  if(!S.c.managed)b.status='active';
+  await go(async()=>{S.c=await api('PUT','/api/platform/clients/'+encodeURIComponent(S.c.id),b);toast('Saved – the client sees the change within a minute');drawClient()});
+}
+async function setStatus(s){
+  if(s==='suspended'&&!confirm('Suspend '+S.c.name+'? Everyone is signed out and cannot sign in until you reactivate.'))return;
+  await go(async()=>{S.c=await api('PUT','/api/platform/clients/'+encodeURIComponent(S.c.id),{status:s});toast(s==='active'?'Reactivated':'Suspended');drawClient()});
+}
+function tBill(){
+  const c=S.c,own=S.me.owner,pk=pkgById(c.package_id);
+  $('#tb').innerHTML=`<div class="grid"><div class="card stat"><b style="font-size:20px">${money(c.price,c.currency)}</b><span>per ${esc(per(c.cycle))}</span></div>
+   <div class="card stat"><b style="font-size:20px">${esc(dd(c.paid_until))}</b><span>Paid / licensed until</span></div>
+   <div class="card stat"><b style="font-size:20px">${esc(c.status)}</b><span>Account status</span></div></div>
+   ${own&&c.managed?`<div class="card" style="margin-top:14px"><h3>Record a payment</h3><p class="mu" style="margin:2px 0">Extends the licence from the current end date (or today if it already ran out) and reactivates the account.</p>
+    <div class="row"><label>Billing periods paid<input id="py" type="number" min="1" value="1"></label><label>Amount received (${esc(c.currency)})<input id="pa" type="number" min="0" value="${c.price}"></label>
+    <label>Method<select id="pm"><option>M-Pesa</option><option>Bank transfer</option><option>Cash</option><option>Card</option><option>Other</option></select></label><label>Reference<input id="pr"></label></div>
+    <label>Note<input id="pn"></label><div class="ac"><button class="b" onclick="recPay()">Record payment</button></div></div>
+    <div class="card" style="margin-top:14px"><h3>Manual licence dates</h3><div class="row"><label>Licensed until<input id="pu" type="date" value="${esc(c.paid_until||'')}"></label><label>Status<select id="ps">${['trial','active','suspended','cancelled'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}</select></label></div><div class="ac"><button class="b g" onclick="saveDates()">Save dates / status</button></div></div>`:''}
+   <h3 style="margin:18px 0 8px">Payment history</h3><div class="tw"><table><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th>Covers</th><th>By</th></tr>${c.payments.map(p=>`<tr><td>${esc(dt(p.paid_at))}</td><td>${money(p.amount,p.currency)}</td><td>${esc(p.method)}</td><td>${esc(p.ref)}</td><td>${esc(p.period_from)} → ${esc(p.period_to)}</td><td>${esc(p.by)}</td></tr>`).join('')||'<tr><td colspan="6" class="mu">No payments recorded yet.</td></tr>'}</table></div>`;
+  const py=$('#py');if(py)py.oninput=()=>$('#pa').value=c.price*Math.max(1,+py.value||1);
+}
+async function recPay(){await go(async()=>{const r=await api('POST','/api/platform/clients/'+encodeURIComponent(S.c.id)+'/payment',{periods:+$('#py').value,amount:+$('#pa').value,method:$('#pm').value,ref:$('#pr').value,note:$('#pn').value});toast('Payment recorded – licensed until '+r.paid_until);await vClient()})}
+async function saveDates(){await go(async()=>{S.c=await api('PUT','/api/platform/clients/'+encodeURIComponent(S.c.id),{paid_until:$('#pu').value,status:$('#ps').value});toast('Saved');drawClient()})}
+function tDet(){
+  const c=S.c;
+  $('#tb').innerHTML=`<div class="card"><div class="row"><label>Organisation name<input id="dn" value="${esc(c.name)}"></label><label>Contact person<input id="dc" value="${esc(c.contact)}"></label></div>
+   <div class="row"><label>Phone<input id="dp" value="${esc(c.phone)}"></label><label>Email<input id="de" value="${esc(c.email)}"></label><label>Country<input id="dy" value="${esc(c.country)}"></label></div>
+   ${S.me.owner?`<label>Web addresses (one per line) <span class="mu">${S.pdom?'– also reachable at <b>'+esc(c.id)+'.'+esc(S.pdom)+'</b> automatically':''}</span><textarea id="dh" rows="3">${esc(c.hosts.join('\n'))}</textarea></label>`:`<p class="mu">Addresses: ${esc(c.hosts.join(', ')||'—')}</p>`}
+   <label>Internal notes<textarea id="dm" rows="3">${esc(c.notes)}</textarea></label><div class="ac"><button class="b" onclick="saveDet()">Save details</button></div></div>`;
+}
+async function saveDet(){
+  const b={contact:$('#dc').value,phone:$('#dp').value,email:$('#de').value,country:$('#dy').value,notes:$('#dm').value};
+  if(S.me.owner){b.name=$('#dn').value;b.hosts=$('#dh').value.split(/\n|,/).map(x=>x.trim()).filter(Boolean)}
+  await go(async()=>{S.c=await api('PUT','/api/platform/clients/'+encodeURIComponent(S.c.id),b);toast('Saved');drawClient()});
+}
+function tUsr(){
+  const c=S.c;
+  $('#tb').innerHTML=`<p class="mu">${c.users} active user(s)${c.max_users?' of '+c.max_users+' allowed':' (no limit)'}. The client's own administrator manages these accounts.</p>
+   <div class="tw"><table><tr><th>Username</th><th>Name</th><th>Role</th><th>Active</th><th>Last login</th></tr>${c.users_list.map(u=>`<tr><td>${esc(u.username)}</td><td>${esc(u.display)}</td><td>${esc(u.role)}</td><td>${u.active?'yes':'no'}</td><td>${esc(dt(u.last_login))}</td></tr>`).join('')}</table></div>
+   <div class="ac" style="justify-content:flex-start"><button class="b g" onclick="resetAdmin()">Reset the administrator's password…</button></div>`;
+}
+async function resetAdmin(){
+  const u=prompt('Which username should get a new one-time password? (leave blank for the first administrator)','');if(u===null)return;
+  await go(async()=>{const r=await api('POST','/api/platform/clients/'+encodeURIComponent(S.c.id)+'/reset-admin',u?{username:u}:{});
+   modal(`<h3>Password reset</h3><p>Send this to the client. It works once and must be changed at sign-in.</p><div class="cred" id="cr" style="white-space:pre-wrap">Username: ${esc(r.username)}\nPassword: ${esc(r.temp_password)}</div><div class="ac"><button class="b" onclick="copy($('#cr').innerText)">Copy</button><button class="b g" onclick="closeM()">Close</button></div>`)});
+}
+async function tAct(){
+  $('#tb').innerHTML='<p class="mu">Loading…</p>';
+  const r=await api('GET','/api/platform/audit?tenant='+encodeURIComponent(S.c.id));
+  $('#tb').innerHTML=auditTable(r.rows);
+}
+
+/* ---------- packages ---------- */
+async function vPkgs(){
+  S.pkgs=(await api('GET','/api/platform/packages')).packages;
+  const modName=id=>(S.mods.find(m=>m.id===id)||{}).name||id;
+  $('#main').innerHTML=`<div class="top"><h2>Packages <small>what each client can use, and what it costs</small></h2>${S.me.owner?'<button class="b" onclick="pkgForm()">+ New package</button>':''}</div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${S.pkgs.map(p=>`<div class="card" style="${p.active?'':'opacity:.6'}">
+   <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><h3>${esc(p.name)}</h3>${p.active?'':'<span class="badge">not for sale</span>'}</div>
+   <div class="stat"><b style="font-size:22px">${money(p.price,p.currency)}</b><span>per ${esc(per(p.cycle))} · ${p.max_users?p.max_users+' users':'unlimited users'} · ${p.trial_days}-day trial</span></div>
+   <p class="mu" style="margin:8px 0">${esc(p.description)}</p><div>${p.modules.map(m=>`<span class="chip">${esc(modName(m))}</span>`).join('')||'<span class="mu">No modules</span>'}</div>
+   <p class="mu" style="margin:8px 0 0">${p.clients} client(s)</p>${S.me.owner?`<div class="ac" style="justify-content:flex-start"><button class="b g s" onclick="pkgForm('${esc(p.id)}')">Edit</button><button class="b g s" onclick="pkgDel('${esc(p.id)}')">Delete</button></div>`:''}</div>`).join('')}</div>`;
+}
+function pkgForm(id){
+  const p=id?pkgById(id):{name:'',description:'',price:0,currency:'KES',cycle:'monthly',modules:[],max_users:0,trial_days:30,active:true};
+  modal(`<h3>${id?'Edit':'New'} package</h3>${id?'<p class="warn">Saving updates every client on this package straight away.</p>':''}
+  <div class="row"><label>Package name<input id="gn" value="${esc(p.name)}"></label><label>Billing cycle<select id="gc">${S.cycles.map(c=>`<option ${c===p.cycle?'selected':''}>${c}</option>`).join('')}</select></label></div>
+  <div class="row"><label>Price<input id="gp" type="number" min="0" value="${p.price}"></label><label>Currency<input id="gcu" value="${esc(p.currency)}"></label><label>Max users <span class="mu">(0 = unlimited)</span><input id="gu" type="number" min="0" value="${p.max_users}"></label><label>Trial days<input id="gt" type="number" min="0" value="${p.trial_days}"></label></div>
+  <label>Description<input id="gd" value="${esc(p.description)}"></label>
+  <label>Modules included</label><div class="mods" id="gm">${S.mods.map(m=>`<label class="mod ${p.modules.includes(m.id)?'on':''}"><input type="checkbox" value="${m.id}" ${p.modules.includes(m.id)?'checked':''}><span><b>${esc(m.name)}</b><small>${esc(m.desc)}</small></span></label>`).join('')}</div>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="ga" style="width:auto" ${p.active?'checked':''}> Available for new clients</label>
+  <div class="ac"><button class="b" onclick="pkgSave('${id||''}')">Save</button><button class="b g" onclick="closeM()">Cancel</button></div>`);
+  $('#gm').onchange=e=>e.target.closest('.mod').classList.toggle('on',e.target.checked);
+}
+async function pkgSave(id){
+  const b={name:$('#gn').value,cycle:$('#gc').value,price:+$('#gp').value,currency:$('#gcu').value,max_users:+$('#gu').value,trial_days:+$('#gt').value,description:$('#gd').value,active:$('#ga').checked,modules:[...document.querySelectorAll('#gm input:checked')].map(i=>i.value)};
+  await go(async()=>{await api(id?'PUT':'POST','/api/platform/packages'+(id?'/'+encodeURIComponent(id):''),b);closeM();toast('Package saved');nav('pkgs')});
+}
+async function pkgDel(id){if(!confirm('Delete this package?'))return;await go(async()=>{await api('DELETE','/api/platform/packages/'+encodeURIComponent(id));nav('pkgs')})}
+
+/* ---------- payments / team / audit ---------- */
+async function vPays(){
+  const r=await api('GET','/api/platform/payments');
+  $('#main').innerHTML=`<div class="top"><h2>Payments</h2></div><div class="tw"><table><tr><th>Date</th><th>Organisation</th><th>Amount</th><th>Method</th><th>Reference</th><th>Covers</th><th>By</th></tr>${r.payments.map(p=>`<tr class="click" onclick="nav('client','${esc(p.tenant_id)}')"><td>${esc(dt(p.paid_at))}</td><td>${esc(p.client)}</td><td>${money(p.amount,p.currency)}</td><td>${esc(p.method)}</td><td>${esc(p.ref)}</td><td>${esc(p.period_from)} → ${esc(p.period_to)}</td><td>${esc(p.by)}</td></tr>`).join('')||'<tr><td colspan="7" class="mu">No payments recorded yet.</td></tr>'}</table></div>`;
+}
+async function vTeam(){
+  const r=await api('GET','/api/platform/users');
+  $('#main').innerHTML=`<div class="top"><h2>Platform team <small>people who can sign in to this panel</small></h2><button class="b" onclick="staffForm()">+ Add person</button></div>
+  <div class="tw"><table><tr><th>Username</th><th>Name</th><th>Role</th><th>Active</th><th>Last login</th><th></th></tr>${r.users.map(u=>`<tr><td>${esc(u.username)}</td><td>${esc(u.display)}</td><td>${esc(u.role)}</td><td>${u.active?'yes':'no'}</td><td>${esc(dt(u.last_login))}</td>
+   <td class="right"><button class="b g s" onclick="staffToggle('${esc(u.id)}',${u.active?0:1},'${esc(u.role)}')">${u.active?'Disable':'Enable'}</button> <button class="b g s" onclick="staffReset('${esc(u.id)}')">Reset password</button></td></tr>`).join('')}</table></div>
+  <p class="mu" style="margin-top:10px"><b>Platform Owner</b>: full control (packages, billing, deploy/suspend clients). <b>Platform Support</b>: can view everything, reset a client's password and edit contact notes only.</p>`;
+}
+function staffForm(){modal(`<h3>Add platform user</h3><div class="row"><label>Username<input id="su"></label><label>Full name<input id="sn"></label></div><div class="row"><label>Role<select id="sr"><option>Platform Support</option><option>Platform Owner</option></select></label><label>Password (blank = generate)<input id="sp"></label></div><div class="ac"><button class="b" onclick="staffSave()">Create</button><button class="b g" onclick="closeM()">Cancel</button></div>`)}
+async function staffSave(){await go(async()=>{const r=await api('POST','/api/platform/users',{username:$('#su').value,display:$('#sn').value,role:$('#sr').value,password:$('#sp').value||undefined});showCred(r.username,r.temp_password||'(the one you entered)')})}
+function showCred(u,p){modal(`<h3>Done</h3><div class="cred" id="cr" style="white-space:pre-wrap">Username: ${esc(u)}\nPassword: ${esc(p)}</div><p class="mu">Shown once. They must change it at first sign-in.</p><div class="ac"><button class="b" onclick="copy($('#cr').innerText)">Copy</button><button class="b g" onclick="closeM();nav('team')">Close</button></div>`)}
+async function staffToggle(id,a,role){await go(async()=>{await api('PUT','/api/platform/users/'+encodeURIComponent(id),{active:!!a,role});nav('team')})}
+async function staffReset(id){if(!confirm('Generate a new one-time password for this person?'))return;await go(async()=>{const r=await api('POST','/api/platform/users/'+encodeURIComponent(id)+'/reset');showCred(r.username,r.temp_password)})}
+function auditTable(rows){return `<div class="tw"><table><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th><th>IP</th></tr>${rows.map(r=>`<tr><td>${esc(dt(r.ts))}</td><td>${esc(r.user)}</td><td>${esc(r.action)}</td><td>${esc(r.detail)}</td><td class="mu">${esc(r.ip)}</td></tr>`).join('')||'<tr><td colspan="5" class="mu">Nothing yet.</td></tr>'}</table></div>`}
+async function vAudit(){const r=await api('GET','/api/platform/audit');$('#main').innerHTML='<div class="top"><h2>Activity log</h2></div>'+auditTable(r.rows)}
+
+boot();
+</script>
+</body>
+</html>

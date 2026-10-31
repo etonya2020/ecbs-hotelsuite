@@ -1,0 +1,23 @@
+# Alternative to Cloudflare Containers: always-on Docker host (Render). Database = Neon (external).
+services:
+  - type: web
+    name: ecbs-hotelsuite
+    runtime: docker
+    plan: starter
+    healthCheckPath: /healthz
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: DB_SSL, value: "true" }
+      - { key: TRUST_PROXY, value: "true" }
+      - { key: COOKIE_SECURE, value: "true" }
+      - { key: TZ, value: Africa/Nairobi }
+      - { key: DATABASE_URL, sync: false }
+      - { key: DATA_KEY, generateValue: true }
+      - { key: ADMIN_USER, value: admin }
+      - { key: ADMIN_PASSWORD, sync: false }
+      - { key: DEV_USER, sync: false }
+      - { key: DEV_PASSWORD, sync: false }
+      - { key: PLATFORM_OWNER_USER, value: ettylinks }
+      - { key: PLATFORM_OWNER_PASSWORD, sync: false }
+      - { key: PLATFORM_HOST, sync: false }     # e.g. platform.yourdomain.com
+      - { key: PLATFORM_DOMAIN, sync: false }   # e.g. yourdomain.com  (clients become code.yourdomain.com)
