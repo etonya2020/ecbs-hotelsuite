@@ -1,0 +1,22 @@
+# OPTIONAL and manual only (Actions tab > Run workflow): deploys to Cloudflare Containers.
+# Not needed if you host on Render (Render deploys by itself on every push to main).
+# Needs repo secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+# plus the app secrets listed in DEPLOY-STEPS.md (set once with `wrangler secret put`, they persist).
+name: Deploy to Cloudflare
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund && npm test
+      - run: npm install --no-audit --no-fund
+        working-directory: cloudflare
+      - run: npx wrangler deploy
+        working-directory: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
