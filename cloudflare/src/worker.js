@@ -8,7 +8,7 @@ export class EcbsApp extends Container {
   constructor(ctx, env) {
     super(ctx, env);
     const pick = ["DATABASE_URL", "DATA_KEY", "ADMIN_USER", "ADMIN_PASSWORD", "DEV_USER", "DEV_PASSWORD", "TZ", "SESSION_IDLE_MIN",
-      "PLATFORM_OWNER_USER", "PLATFORM_OWNER_PASSWORD", "PLATFORM_HOST", "PLATFORM_DOMAIN"];
+      "PLATFORM_OWNER_USER", "PLATFORM_OWNER_PASSWORD", "PLATFORM_OWNER_RESET", "ADMIN_RESET", "PLATFORM_HOST", "PLATFORM_DOMAIN"];
     this.envVars = {
       NODE_ENV: "production",
       DB_SSL: "true",

@@ -428,8 +428,19 @@ module.exports = function platform(X) {
     if (!(await db.q('SELECT 1 AS x FROM platform_packages LIMIT 1')).length) {
       let i = 0; for (const p of SEED_PACKAGES) await db.q('INSERT INTO platform_packages(id,name,description,price,currency,cycle,modules,max_users,trial_days,active,sort,created_at) VALUES(?,?,?,?,?,?,?,?,?,1,?,?)', [p.id, p.name, p.description, p.price, 'KES', p.cycle, JSON.stringify(p.modules), p.max_users, p.trial_days, ++i, Date.now()]);
     }
+    const username0 = String(process.env.PLATFORM_OWNER_USER || 'ettylinks').toLowerCase();
+    // Recovery: set secrets PLATFORM_OWNER_RESET=true + PLATFORM_OWNER_PASSWORD, restart, sign in, then DELETE the RESET secret.
+    if (process.env.PLATFORM_OWNER_RESET === 'true' && process.env.PLATFORM_OWNER_PASSWORD) {
+      const bad = sec.pwPolicy(process.env.PLATFORM_OWNER_PASSWORD, username0); if (bad) throw new Error('PLATFORM_OWNER_PASSWORD rejected: ' + bad);
+      const h = await sec.hashPw(process.env.PLATFORM_OWNER_PASSWORD), ex = (await db.q('SELECT id FROM users WHERE tenant_id=? AND username=?', [PTID, username0]))[0];
+      if (ex) { await db.q('UPDATE users SET pw_hash=?, role=?, active=1, must_change=1 WHERE id=?', [h, OWNER, ex.id]); await db.q('DELETE FROM sessions WHERE user_id=?', [ex.id]); }
+      else await db.q('INSERT INTO users(id,tenant_id,username,display,role,pw_hash,active,must_change,created_at) VALUES(?,?,?,?,?,?,1,1,?)', [sec.uuid(), PTID, username0, 'Ettylinks Owner', OWNER, h, Date.now()]);
+      await db.q('DELETE FROM login_attempts WHERE k LIKE ?', ['p%']);
+      log({ level: 'warn', msg: 'PLATFORM_OWNER_RESET is on: owner "' + username0 + '" password was set from PLATFORM_OWNER_PASSWORD. Delete the PLATFORM_OWNER_RESET secret now.' });
+      return;
+    }
     if (Number((await db.q('SELECT COUNT(*) c FROM users WHERE tenant_id=?', [PTID]))[0].c)) return;
-    const username = String(process.env.PLATFORM_OWNER_USER || 'ettylinks').toLowerCase(); let pw = process.env.PLATFORM_OWNER_PASSWORD; const gen = !pw; pw = pw || sec.randomPassword();
+    const username = username0; let pw = process.env.PLATFORM_OWNER_PASSWORD; const gen = !pw; pw = pw || sec.randomPassword();
     const bad = !gen && sec.pwPolicy(pw, username); if (bad) throw new Error('PLATFORM_OWNER_PASSWORD rejected: ' + bad);
     await db.q('INSERT INTO users(id,tenant_id,username,display,role,pw_hash,active,must_change,created_at) VALUES(?,?,?,?,?,?,1,1,?)', [sec.uuid(), PTID, username, 'Ettylinks Owner', OWNER, await sec.hashPw(pw), Date.now()]);
     if (gen) console.log(`\n=== FIRST RUN: developer panel owner "${username}" created. One-time password: ${pw}  (change it at first login; panel is at /platform) ===\n`);

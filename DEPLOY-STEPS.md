@@ -74,3 +74,17 @@ Then open `https://<panel address>/platform`. Full guide: DEVELOPER-PANEL.md.
 4. DNS: proxied (orange) record `*` -> AAAA `100::`. 5. GitHub secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID, then Actions > Deploy to Cloudflare > Run workflow.
 6. Worker > Settings > Variables and Secrets (type Secret): DATABASE_URL, DATA_KEY, ADMIN_PASSWORD, PLATFORM_OWNER_PASSWORD, PLATFORM_HOST, PLATFORM_DOMAIN; run the workflow again.
 7. Open https://platform.yourdomain.com. The daily cron in wrangler.jsonc wakes the sleeping server at 05:35 so room billing posts.
+
+## ettylinks-tech.co.ke: exact values
+* Developer panel: https://platform.ettylinks-tech.co.ke   (secret PLATFORM_HOST=platform.ettylinks-tech.co.ke)
+* Client sites:    https://<code>.ettylinks-tech.co.ke      (secret PLATFORM_DOMAIN=ettylinks-tech.co.ke)
+* DNS (Cloudflare): proxied AAAA record  `*`  ->  `100::`   (the panel's record is created automatically by the custom domain)
+* API token: template "Edit Cloudflare Workers" + extra permissions Zone > DNS > Edit and Zone > Zone > Read.
+* If you run a website on www.ettylinks-tech.co.ke, add a route www.ettylinks-tech.co.ke/* with Worker = None (Workers & Pages > your domain's Workers Routes) so it is not sent to the app.
+
+## Update: explicit addresses (use this when other systems already run on the same domain)
+`cloudflare/wrangler.jsonc` now lists exact hostnames (platform.* and hotelsuite.*), NOT a wildcard, so nothing else on
+ettylinks-tech.co.ke is affected. For every new client address add a line `{ "pattern": "client.ettylinks-tech.co.ke", "custom_domain": true }`
+and commit; GitHub deploys it. No wildcard DNS record is needed (delete the `*` AAAA record if you created it).
+Password recovery without a shell: set secrets `PLATFORM_OWNER_RESET=true` + `PLATFORM_OWNER_PASSWORD=<new>` (panel) or
+`ADMIN_RESET=true` + `ADMIN_PASSWORD=<new>` (the standalone site), redeploy, sign in, then DELETE the RESET secret and redeploy.

@@ -620,6 +620,16 @@ function server() {
 async function bootstrap() {
   const tid = process.env.TENANT_ID || 'default'; await ensureTenant(tid); await getRoles(tid);
   const n = Number((await db.q('SELECT COUNT(*) c FROM users WHERE tenant_id=?', [tid]))[0].c);
+  const adminName = (process.env.ADMIN_USER || 'admin').toLowerCase();
+  // Recovery: set secrets ADMIN_RESET=true + ADMIN_PASSWORD, restart, sign in, then DELETE the ADMIN_RESET secret.
+  if (n && process.env.ADMIN_RESET === 'true' && process.env.ADMIN_PASSWORD) {
+    const bad = sec.pwPolicy(process.env.ADMIN_PASSWORD, adminName); if (bad) throw new Error('ADMIN_PASSWORD rejected: ' + bad);
+    const h = await sec.hashPw(process.env.ADMIN_PASSWORD), ex = (await db.q('SELECT id FROM users WHERE tenant_id=? AND username=?', [tid, adminName]))[0];
+    if (ex) { await db.q('UPDATE users SET pw_hash=?, role=?, active=1, must_change=1 WHERE id=?', [h, R.ADMIN, ex.id]); await db.q('DELETE FROM sessions WHERE user_id=?', [ex.id]); await db.q('DELETE FROM login_attempts WHERE k LIKE ?', ['%' + adminName + '%']); }
+    else await db.q('INSERT INTO users(id,tenant_id,username,display,role,pw_hash,active,must_change,created_at) VALUES(?,?,?,?,?,?,1,1,?)', [sec.uuid(), tid, adminName, adminName, R.ADMIN, h, Date.now()]);
+    log({ level: 'warn', msg: 'ADMIN_RESET is on: "' + adminName + '" password was set from ADMIN_PASSWORD. Delete the ADMIN_RESET secret now.' });
+    return;
+  }
   if (n) return;
   const mk = async (username, role, pw, label) => {
     const generated = !pw; pw = pw || sec.randomPassword();
@@ -645,4 +655,4 @@ async function start() {
   return s;
 }
 if (require.main === module) start().catch(e => { console.error('Startup failed:', e.message); process.exit(1); });
-module.exports = { start, server, bootstrap, billing };
+module.exports = { start, server, bootstrap, billing, platformBootstrap: () => platform.bootstrap() };
