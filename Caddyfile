@@ -1,0 +1,5 @@
+# Automatic HTTPS (Let's Encrypt). Set DOMAIN in .env, e.g. hotel.example.com, and point its DNS A record at this server.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:3000
+}

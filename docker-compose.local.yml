@@ -1,0 +1,9 @@
+# Try it on your own computer (no domain, no HTTPS):
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build db app
+# then open http://localhost:3000
+services:
+  app:
+    environment:
+      COOKIE_SECURE: "false"
+      TRUST_PROXY: "false"
+    ports: ["3000:3000"]

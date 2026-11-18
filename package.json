@@ -1,0 +1,31 @@
+{
+  "name": "ecbs-hotelsuite-server",
+  "version": "3.0.0-cloudflare.1",
+  "description": "ECBS (HotelSuite) backend: runs on Node (PostgreSQL/SQLite) or on Cloudflare (Workers + Durable Object SQLite)",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=22.5"
+  },
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "create-user": "node scripts/create-user.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node scripts/smoke.js",
+    "test:browser": "node test-browser/windows.test.js",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "cf:deploy:staging": "wrangler deploy --env staging",
+    "cf:tail": "wrangler tail",
+    "gen:schema": "node scripts/gen-schema.js",
+    "test:cf": "ECBS_TARGET=cf node --test test/*.test.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

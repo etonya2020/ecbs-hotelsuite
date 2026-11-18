@@ -1,0 +1,47 @@
+name: Test and deploy to Cloudflare
+# dev  branch -> staging copy      main branch -> production copy
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/gen-schema.js && git diff --exit-code src/schema-sqlite.js
+      - run: npm test            # Node path + the Cloudflare simulation
+      - run: npm run test:cf     # the whole suite again through Worker -> Durable Object -> SQLite adapter
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: ${{ github.ref == 'refs/heads/main' && 'deploy' || 'deploy --env staging' }}
+          # copied from GitHub (Settings > Environments > production/staging > Secrets) into Cloudflare on every deploy
+          secrets: |
+            ADMIN_PASSWORD
+            DEV_PASSWORD
+            DATA_KEY
+            OPS_TOKEN
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          DEV_PASSWORD: ${{ secrets.DEV_PASSWORD }}
+          DATA_KEY: ${{ secrets.DATA_KEY }}
+          OPS_TOKEN: ${{ secrets.OPS_TOKEN }}
