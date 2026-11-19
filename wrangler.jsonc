@@ -1,48 +1,13 @@
-// ECBS HotelSuite - Cloudflare edition.
-//   Production : npx wrangler deploy                     -> https://ecbs-hotelsuite.<your-subdomain>.workers.dev
-//   Staging    : npx wrangler deploy --env staging       -> https://ecbs-hotelsuite-staging.<your-subdomain>.workers.dev
-// Secrets (never put these in this file): ADMIN_PASSWORD, DATA_KEY, OPS_TOKEN, DEV_PASSWORD  ->  npx wrangler secret put NAME
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ecbs-hotelsuite",
-  "main": "cf/worker.mjs",
-  "compatibility_date": "2026-06-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
-
-  // The web page. run_worker_first: every request goes through the Worker so the security headers are always added.
-  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
-
-  // One Durable Object (with its own SQLite database) per hotel / tenant.
-  "durable_objects": { "bindings": [{ "name": "TENANT", "class_name": "Tenant" }] },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Tenant"] }],
-
+  // ...
   "vars": {
-    "NODE_ENV": "production",
-    "TZ": "Africa/Nairobi",          // the hotel's time zone: the nightly billing time (default 05:30) is read in this zone
-    "COOKIE_SECURE": "true",
-    "TRUST_PROXY": "false",          // keep false: the real client address comes from Cloudflare (CF-Connecting-IP)
-    "MAX_REC_KB": "900",             // a database row may be at most 2 MB; keep one record well under that
     "ADMIN_USER": "admin",
-    "DEV_USER": "edbis"
-    // "TENANT_ID": "default",                        // the hotel served on every address that is not listed below
-    // "TENANT_MAP": "hotelb.example.com=hotelb",     // extra hotels: address=tenant-id, comma separated
+    "COOKIE_SECURE": "true",
+    "DEV_USER": "edbis",
+    "MAX_REC_KB": "900",
+    "NODE_ENV": "production",
+    "TRUST_PROXY": "false",
+    "TZ": "Africa/Nairobi"
   },
-
-  // Same settings again for the test copy: its own name, its own Durable Object, its own (separate) data.
-  "env": {
-    "staging": {
-      "name": "ecbs-hotelsuite-staging",
-      "compatibility_date": "2026-06-01",
-      "compatibility_flags": ["nodejs_compat"],
-      "observability": { "enabled": true },
-      "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
-      "durable_objects": { "bindings": [{ "name": "TENANT", "class_name": "Tenant" }] },
-      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Tenant"] }],
-      "vars": { "NODE_ENV": "production", "TZ": "Africa/Nairobi", "COOKIE_SECURE": "true", "TRUST_PROXY": "false", "MAX_REC_KB": "900", "ADMIN_USER": "admin", "DEV_USER": "edbis" }
-    }
-  }
-
-  // LATER, with your own domain (bought through Cloudflare or added to it), add to the top level:
-  // "routes": [{ "pattern": "hotel.yourdomain.com", "custom_domain": true }]
+  // ...
 }
